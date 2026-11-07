@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dr Pepper Price Tracker - Weekly Ads</title>
+
+  <!-- PWA Metadata -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#71001A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DP Tracker">
+  <link rel="apple-touch-icon" href="https://img.icons8.com/emoji/192/soda-can-emoji.png">
+
+  <style>
+    :root {
+      --dr-pepper: #71001A;
+      --gold: #D4AF37;
+      --bg: #F4F5F7;
+      --card-bg: #FFFFFF;
+      --text: #1C1E21;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      color: var(--dr-pepper);
+      margin: 0 0 8px 0;
+    }
+
+    p.subtitle {
+      color: #606770;
+      margin: 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select, button {
+      padding: 10px 12px;
+      border: 1px solid #CCCFD3;
+      border-radius: 6px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    button {
+      background-color: var(--dr-pepper);
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      margin-top: 8px;
+    }
+
+    button:hover {
+      background-color: #500012;
+    }
+
+    .btn-delete {
+      background-color: transparent;
+      color: #D9381E;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border: 1px solid #D9381E;
+      border-radius: 4px;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+
+    .btn-delete:hover {
+      background-color: #D9381E;
+      color: white;
+    }
+
+    .deals-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      margin-bottom: 0;
+    }
+
+    .deal-card {
+      background: var(--card-bg);
+      border: 1px solid #E4E6EB;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color 0.2s ease;
+    }
+
+    .deal-card.best-value {
+      border: 2px solid var(--gold);
+      background-color: #FFFDF5;
+    }
+
+    .badge {
+      background-color: var(--gold);
+      color: #000;
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      text-transform: uppercase;
+    }
+
+    .store-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .deal-details {
+      color: #606770;
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    .expire-tag {
+      color: #D9381E;
+      font-weight: 500;
+    }
+
+    .price-block {
+      text-align: right;
+    }
+
+    .total-price {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: var(--dr-pepper);
+    }
+
+    .unit-price {
+      font-size: 0.85rem;
+      color: #606770;
+      margin-top: 2px;
+    }
+
+    a.item-link {
+      color: var(--dr-pepper);
+      text-decoration: underline;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🥤 Dr Pepper Weekly Ad Tracker</h1>
+    <p class="subtitle">Compare deals across Target, Amazon, Fresh by Reasor's, Walmart, Dollar General, CVS, Walgreens, and Homeland</p>
+  </header>
+
+  <!-- Input Form -->
+  <div class="card">
+    <form id="dealForm">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="store">Retailer</label>
+          <select id="store" required>
+            <option value="Target">Target</option>
+            <option value="Amazon">Amazon</option>
+            <option value="Fresh by Reasor's">Fresh by Reasor's</option>
+            <option value="Walmart">Walmart</option>
+            <option value="Dollar General">Dollar General</option>
+            <option value="CVS">CVS</option>
+            <option value="Walgreens">Walgreens</option>
+            <option value="Homeland">Homeland</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="product">Packaging Size</label>
+          <select id="product" required>
+            <option value="12pk-cans" data-oz="144" selected>12-Pack Cans (144 fl oz total)</option>
+            <option value="20pk-cans" data-oz="240">20-Pack Cans (240 fl oz total)</option>
+            <option value="24pk-cans" data-oz="288">24-Pack Cans (288 fl oz total)</option>
+            <option value="6pk-bottles" data-oz="101.4">6-Pack 16.9oz Bottles (101.4 fl oz total)</option>
+            <option value="2L-bottle" data-oz="67.6">2-Liter Bottle (67.6 fl oz total)</option>
+            <option value="20oz-single" data-oz="20">20 oz Single Bottle (20 fl oz total)</option>
+            <option value="12pk-realsugar" data-oz="144" data-link="https://www.amazon.com/Dr-Pepper-Sugar-Ounce-Bottles/dp/B01DXWPEM0">⭐ Real Sugar 12-Pack 12oz Bottles (144 fl oz)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="dealType">Deal Format</label>
+          <select id="dealType" required>
+            <option value="standard">Standard / Fixed Multi-Buy (e.g. 3 for $15)</option>
+            <option value="pctOff3">Save 40% When You Buy 3</option>
+            <option value="wyb3">When You Buy 3 (WYB 3)</option>
+            <option value="b2g1">Buy 2, Get 1 FREE</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="qtyGroup">
+          <label for="quantity">Buy Quantity</label>
+          <input type="number" id="quantity" value="1" min="1" required>
+        </div>
+
+        <div class="form-group">
+          <label for="totalPrice" id="priceLabel">Total Sale Price ($)</label>
+          <input type="number" id="totalPrice" step="0.01" placeholder="e.g. 15.00" required>
+        </div>
+
+        <div class="form-group">
+          <label for="expireDate">Deal Expires (Optional)</label>
+          <input type="date" id="expireDate">
+        </div>
+
+        <div class="form-group full-width">
+          <button type="submit">Add / Update Deal</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tracked Results Display Header with Filter -->
+  <div class="deals-header">
+    <div>
+      <h2 style="margin: 0;">Active Deals</h2>
+      <small>Sorted by lowest price per fl oz</small>
+    </div>
+
+    <div class="filter-group">
+      <label for="filterSize">Filter By Size:</label>
+      <select id="filterSize">
+        <option value="all">All Sizes</option>
+        <option value="12pk-cans" selected>12-Pack Cans</option>
+        <option value="20pk-cans">20-Pack Cans</option>
+        <option value="24pk-cans">24-Pack Cans</option>
+        <option value="6pk-bottles">6-Pack 16.9oz Bottles</option>
+        <option value="2L-bottle">2-Liter Bottle</option>
+        <option value="20oz-single">20 oz Single Bottle</option>
+        <option value="12pk-realsugar">⭐ Real Sugar 12-Pack Bottles</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="dealList"></div>
+</div>
+
+<script>
+  const defaultDeals = [
+    { id: 1, store: "Target", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "pctOff3", qty: 3, totalPrice: 14.38, unitPriceEach: 7.99, ozPerUnit: 144, expireDate: "" },
+    { id: 2, store: "Fresh by Reasor's", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "wyb3", qty: 3, totalPrice: 11.97, unitPriceEach: 3.99, ozPerUnit: 144, expireDate: "" },
+    { id: 3, store: "CVS", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "b2g1", qty: 3, totalPrice: 19.98, unitPriceEach: 9.99, ozPerUnit: 144, expireDate: "" },
+    { id: 4, store: "Dollar General", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "standard", qty: 3, totalPrice: 15.00, ozPerUnit: 144, expireDate: "" },
+    { id: 5, store: "Walmart", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "standard", qty: 1, totalPrice: 7.28, ozPerUnit: 144, expireDate: "" },
+    { id: 6, store: "Amazon", productKey: "12pk-realsugar", label: "Real Sugar 12-Pack 12oz Bottles", dealType: "standard", qty: 1, totalPrice: 29.99, ozPerUnit: 144, expireDate: "", link: "https://www.amazon.com/Dr-Pepper-Sugar-Ounce-Bottles/dp/B01DXWPEM0" }
+  ];
+
+  let deals = JSON.parse(localStorage.getItem('drPepperDeals')) || defaultDeals;
+
+  function saveToLocalStorage() {
+    localStorage.setItem('drPepperDeals', JSON.stringify(deals));
+  }
+
+  const form = document.getElementById('dealForm');
+  const dealList = document.getElementById('dealList');
+  const filterSelect = document.getElementById('filterSize');
+  const dealTypeSelect = document.getElementById('dealType');
+  const qtyGroup = document.getElementById('qtyGroup');
+  const priceLabel = document.getElementById('priceLabel');
+
+  dealTypeSelect.addEventListener('change', () => {
+    if (dealTypeSelect.value === 'b2g1') {
+      qtyGroup.style.display = 'none';
+      priceLabel.innerText = "Single Item Regular Price ($)";
+      document.getElementById('totalPrice').placeholder = "e.g. 9.99";
+    } else if (dealTypeSelect.value === 'wyb3') {
+      qtyGroup.style.display = 'none';
+      priceLabel.innerText = "Price Each WYB 3 ($)";
+      document.getElementById('totalPrice').placeholder = "e.g. 3.99";
+    } else if (dealTypeSelect.value === 'pctOff3') {
+      qtyGroup.style.display = 'none';
+      priceLabel.innerText = "Single Item Regular Price ($)";
+      document.getElementById('totalPrice').placeholder = "e.g. 7.99";
+    } else {
+      qtyGroup.style.display = 'flex';
+      priceLabel.innerText = "Total Sale Price ($)";
+      document.getElementById('totalPrice').placeholder = "e.g. 15.00";
+    }
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const store = document.getElementById('store').value;
+    const productSelect = document.getElementById('product');
+    const productKey = productSelect.value;
+    const label = productSelect.options[productSelect.selectedIndex].text.split(' (')[0].replace('⭐ ', '');
+    const ozPerUnit = parseFloat(productSelect.options[productSelect.selectedIndex].dataset.oz);
+    const link = productSelect.options[productSelect.selectedIndex].dataset.link || "";
+    const dealType = dealTypeSelect.value;
+    const expireDate = document.getElementById('expireDate').value;
+
+    let qty = 1;
+    let totalPrice = 0;
+    let unitPriceEach = 0;
+
+    if (dealType === 'b2g1') {
+      qty = 3;
+      unitPriceEach = parseFloat(document.getElementById('totalPrice').value);
+      totalPrice = unitPriceEach * 2;
+    } else if (dealType === 'wyb3') {
+      qty = 3;
+      unitPriceEach = parseFloat(document.getElementById('totalPrice').value);
+      totalPrice = unitPriceEach * 3;
+    } else if (dealType === 'pctOff3') {
+      qty = 3;
+      unitPriceEach = parseFloat(document.getElementById('totalPrice').value);
+      totalPrice = (unitPriceEach * 3) * 0.60;
+    } else {
+      qty = parseInt(document.getElementById('quantity').value, 10);
+      totalPrice = parseFloat(document.getElementById('totalPrice').value);
+    }
+
+    const newDeal = {
+      id: Date.now(),
+      store,
+      productKey,
+      label,
+      dealType,
+      qty,
+      totalPrice,
+      unitPriceEach,
+      ozPerUnit,
+      expireDate,
+      link
+    };
+
+    const existingIndex = deals.findIndex(d => d.store === store && d.productKey === productKey);
+
+    if (existingIndex !== -1) {
+      deals[existingIndex] = { ...newDeal, id: deals[existingIndex].id };
+    } else {
+      deals.push(newDeal);
+    }
+
+    saveToLocalStorage();
+    form.reset();
+    dealTypeSelect.dispatchEvent(new Event('change'));
+    renderDeals();
+  });
+
+  function deleteDeal(id) {
+    deals = deals.filter(deal => deal.id !== id);
+    saveToLocalStorage();
+    renderDeals();
+  }
+
+  filterSelect.addEventListener('change', renderDeals);
+
+  function renderDeals() {
+    dealList.innerHTML = '';
+    const selectedFilter = filterSelect.value;
+
+    const filteredDeals = deals.filter(deal => selectedFilter === 'all' || deal.productKey === selectedFilter);
+
+    if (filteredDeals.length === 0) {
+      dealList.innerHTML = '<p style="color: #606770;">No deals available for the selected size filter.</p>';
+      return;
+    }
+
+    const processedDeals = filteredDeals.map(deal => {
+      const totalOunces = deal.qty * deal.ozPerUnit;
+      const pricePerOz = deal.totalPrice / totalOunces;
+      return { ...deal, totalOunces, pricePerOz };
+    });
+
+    processedDeals.sort((a, b) => a.pricePerOz - b.pricePerOz);
+
+    processedDeals.forEach((deal, index) => {
+      const isBest = index === 0 && processedDeals.length > 1;
+      const card = document.createElement('div');
+      card.className = `deal-card ${isBest ? 'best-value' : ''}`;
+
+      let promoText = '';
+      if (deal.dealType === 'b2g1') {
+        promoText = `Buy 2 Get 1 FREE ($${deal.unitPriceEach.toFixed(2)} reg. each)`;
+      } else if (deal.dealType === 'wyb3') {
+        promoText = `$${deal.unitPriceEach.toFixed(2)} each WYB 3`;
+      } else if (deal.dealType === 'pctOff3') {
+        promoText = `Save 40% WYB 3 ($${deal.unitPriceEach.toFixed(2)} reg. each)`;
+      } else {
+        promoText = deal.qty > 1 ? `${deal.qty} for $${deal.totalPrice.toFixed(2)}` : `$${deal.totalPrice.toFixed(2)} each`;
+      }
+
+      let expireHTML = '';
+      if (deal.expireDate) {
+        const dateObj = new Date(deal.expireDate + 'T00:00:00');
+        const formattedDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        expireHTML = ` • <span class="expire-tag">Expires: ${formattedDate}</span>`;
+      }
+
+      let linkHTML = deal.link ? `<br><a href="${deal.link}" target="_blank" class="item-link">View Item on Amazon ↗</a>` : '';
+
+      card.innerHTML = `
+        <div>
+          <span class="store-title">${deal.store}</span> ${isBest ? '<span class="badge">Best Value</span>' : ''}
+          <div class="deal-details">${deal.label} • (${promoText})${expireHTML}${linkHTML}</div>
+          <button class="btn-delete" onclick="deleteDeal(${deal.id})">Remove</button>
+        </div>
+        <div class="price-block">
+          <div class="total-price">$${deal.totalPrice.toFixed(2)} total</div>
+          <div class="unit-price">$${deal.pricePerOz.toFixed(3)} / fl oz</div>
+        </div>
+      `;
+
+      dealList.appendChild(card);
+    });
+  }
+
+  renderDeals();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => console.log('Service Worker Registered!', reg))
+        .catch((err) => console.error('Service Worker Registration Failed:', err));
+    });
+  }
+</script>
+
+</body>
+</html>
