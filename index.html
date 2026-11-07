@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dr Pepper Price Tracker - Weekly Ads</title>
+  <title>Dr Pepper Price Tracker - Weekly Ads (v2.1.0)</title>
 
   <!-- PWA Metadata -->
   <link rel="manifest" href="manifest.json">
@@ -45,12 +45,25 @@
 
     h1 {
       color: var(--dr-pepper);
-      margin: 0 0 8px 0;
+      margin: 0 0 4px 0;
+    }
+
+    .version-tag {
+      display: inline-block;
+      background-color: var(--dr-pepper);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 12px;
+      vertical-align: middle;
+      margin-left: 6px;
     }
 
     p.subtitle {
       color: #606770;
-      margin: 0;
+      margin: 4px 0 0 0;
+      font-size: 0.95rem;
     }
 
     .card {
@@ -234,13 +247,20 @@
       text-decoration: underline;
       font-size: 0.85rem;
     }
+
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      color: #8A8D91;
+      font-size: 0.8rem;
+    }
   </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>🥤 Dr Pepper Weekly Ad Tracker</h1>
+    <h1>🥤 Dr Pepper Weekly Ad Tracker <span class="version-tag">v2.1.0</span></h1>
     <p class="subtitle">Compare deals across Target, Amazon, Fresh by Reasor's, Walmart, Dollar General, CVS, Walgreens, and Homeland</p>
   </header>
 
@@ -338,9 +358,16 @@
   </div>
 
   <div id="dealList"></div>
+
+  <footer>
+    Dr Pepper Price Tracker • Version 2.1.0 • Data Saved Locally
+  </footer>
 </div>
 
 <script>
+  const APP_VERSION = "2.1.0";
+  const STORAGE_KEY = "dpTracker_v2_1_0";
+
   const defaultDeals = [
     { id: 1, store: "Target", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "pctOff3", qty: 3, totalPrice: 14.38, unitPriceEach: 7.99, ozPerUnit: 144, expireDate: "", updatedDate: "2026-11-01" },
     { id: 2, store: "Fresh by Reasor's", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "wyb3", qty: 3, totalPrice: 11.97, unitPriceEach: 3.99, ozPerUnit: 144, expireDate: "", updatedDate: "2026-11-04" },
@@ -356,12 +383,44 @@
     { store: "Walmart", productKey: "12pk-cans", pricePerOz: 0.048, date: "2026-10-20" }
   ];
 
-  let deals = JSON.parse(localStorage.getItem('drPepperDeals')) || defaultDeals;
-  let priceHistory = JSON.parse(localStorage.getItem('drPepperHistory')) || defaultHistory;
+  // Automatic Data Migration Engine
+  function loadAndMigrateData() {
+    let saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Error parsing current version storage:", e);
+      }
+    }
+
+    // Check for older version keys and migrate forward automatically
+    const legacyDeals = localStorage.getItem('drPepperDeals');
+    const legacyHistory = localStorage.getItem('drPepperHistory');
+
+    const deals = legacyDeals ? JSON.parse(legacyDeals) : defaultDeals;
+    const priceHistory = legacyHistory ? JSON.parse(legacyHistory) : defaultHistory;
+
+    const migratedState = {
+      version: APP_VERSION,
+      deals: deals,
+      priceHistory: priceHistory,
+      lastSaved: new Date().toISOString()
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(migratedState));
+    return migratedState;
+  }
+
+  let appData = loadAndMigrateData();
+  let deals = appData.deals;
+  let priceHistory = appData.priceHistory;
 
   function saveToLocalStorage() {
-    localStorage.setItem('drPepperDeals', JSON.stringify(deals));
-    localStorage.setItem('drPepperHistory', JSON.stringify(priceHistory));
+    appData.deals = deals;
+    appData.priceHistory = priceHistory;
+    appData.lastSaved = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
   }
 
   const form = document.getElementById('dealForm');
@@ -446,7 +505,6 @@
 
     const currentPricePerOz = totalPrice / (qty * ozPerUnit);
 
-    // Record entry to price history for 30-day trends
     priceHistory.push({
       store,
       productKey,
@@ -524,7 +582,6 @@
     const selectedFilter = filterSelect.value;
     const now = new Date();
 
-    // Revert expired deals past their expiration date
     const activeDeals = deals.filter(deal => {
       if (!deal.expireDate) return true;
       const expDate = new Date(deal.expireDate + 'T23:59:59');
@@ -551,7 +608,6 @@
       const card = document.createElement('div');
       card.className = `deal-card ${isBest ? 'best-value' : ''}`;
 
-      // Check for Stale Data (> 30 Days Old)
       let isStale = false;
       if (deal.updatedDate) {
         const lastUpdated = new Date(deal.updatedDate + 'T00:00:00');
