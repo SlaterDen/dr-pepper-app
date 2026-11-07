@@ -1,4 +1,4 @@
- bplist00ÑXUTI-DataÑ_public.utf8-plain-text_Ÿconst CACHE_NAME = 'dp-tracker-v2.2.1';
+ bplist00ÑXUTI-DataÑ_public.utf8-plain-text_Ÿconst CACHE_NAME = 'dp-tracker-v2.2.2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
