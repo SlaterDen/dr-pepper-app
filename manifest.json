@@ -1,24 +1,20 @@
 {
   "name": "Dr Pepper Price Tracker",
   "short_name": "DP Tracker",
-  "description": "Compare Dr Pepper deals across retailers and find the lowest price per fl oz.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#F4F5F7",
   "theme_color": "#71001A",
-  "orientation": "portrait",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2405/2405479.png",
+      "src": "./icon.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2405/2405479.png",
+      "src": "./icon.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
