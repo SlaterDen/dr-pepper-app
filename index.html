@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dr Pepper Price Tracker - Weekly Ads (v2.2.0)</title>
+  <title>Dr Pepper Price Tracker - Weekly Ads (v2.2.1)</title>
 
   <!-- PWA Metadata -->
   <link rel="manifest" href="manifest.json">
@@ -299,13 +299,12 @@
 
 <div class="container">
   <header>
-    <h1>🥤 Dr Pepper Weekly Ad Tracker <span class="version-tag">v2.2.0</span></h1>
+    <h1>🥤 Dr Pepper Weekly Ad Tracker <span class="version-tag">v2.2.1</span></h1>
     <p class="subtitle">Compare deals across Target, Amazon, Fresh by Reasor's, Walmart, Dollar General, CVS, Walgreens, and Homeland</p>
   </header>
 
   <!-- Input Form -->
   <div class="card">
-    <!-- Stockup Target Setting -->
     <div class="settings-bar">
       <div>
         <label for="targetPriceInput"><strong>🎯 Target Stockup Price:</strong></label>
@@ -384,7 +383,6 @@
     </form>
   </div>
 
-  <!-- Tracked Results Display Header with Filter -->
   <div class="deals-header">
     <div>
       <h2 style="margin: 0;">Active Deals</h2>
@@ -410,280 +408,17 @@
   <div id="dealList"></div>
 
   <footer>
-    Dr Pepper Price Tracker • Version 2.2.0 • Data Saved Locally
+    Dr Pepper Price Tracker • Version 2.2.1 • Data Saved Locally
   </footer>
 </div>
 
 <script>
-  const APP_VERSION = "2.2.0";
-  const STORAGE_KEY = "dpTracker_v2_2_0";
+  const APP_VERSION = "2.2.1";
+  const STORAGE_KEY = "dpTracker_v2_2_1";
 
   const defaultDeals = [
     { id: 1, store: "Target", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "pctOff3", qty: 3, totalPrice: 14.38, unitPriceEach: 7.99, ozPerUnit: 144, unitsPerPack: 12, unitName: "can", expireDate: "", updatedDate: "2026-11-01" },
     { id: 2, store: "Fresh by Reasor's", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "wyb3", qty: 3, totalPrice: 11.97, unitPriceEach: 3.99, ozPerUnit: 144, unitsPerPack: 12, unitName: "can", expireDate: "", updatedDate: "2026-11-04" },
     { id: 3, store: "CVS", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "b2g1", qty: 3, totalPrice: 19.98, unitPriceEach: 9.99, ozPerUnit: 144, unitsPerPack: 12, unitName: "can", expireDate: "", updatedDate: "2026-10-01" },
     { id: 4, store: "Dollar General", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "standard", qty: 3, totalPrice: 15.00, ozPerUnit: 144, unitsPerPack: 12, unitName: "can", expireDate: "", updatedDate: "2026-11-02" },
-    { id: 5, store: "Walmart", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "standard", qty: 1, totalPrice: 7.28, ozPerUnit: 144, unitsPerPack: 12, unitName: "can", expireDate: "", updatedDate: "2026-11-05" },
-    { id: 6, store: "Amazon", productKey: "12pk-realsugar", label: "Real Sugar 12-Pack 12oz Bottles", dealType: "standard", qty: 1, totalPrice: 29.99, ozPerUnit: 144, unitsPerPack: 12, unitName: "bottle", expireDate: "", updatedDate: "2026-11-03", link: "https://www.amazon.com/Dr-Pepper-Sugar-Ounce-Bottles/dp/B01DXWPEM0" }
-  ];
-
-  const defaultHistory = [
-    { store: "Target", productKey: "12pk-cans", pricePerOz: 0.035, date: "2026-10-15" },
-    { store: "Fresh by Reasor's", productKey: "12pk-cans", pricePerOz: 0.031, date: "2026-10-12" },
-    { store: "Walmart", productKey: "12pk-cans", pricePerOz: 0.048, date: "2026-10-20" }
-  ];
-
-  // Automatic Data Migration Engine
-  function loadAndMigrateData() {
-    let saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Error parsing current version storage:", e);
-      }
-    }
-
-    // Migration from v2.1.0 or earlier
-    const legacyKey = "dpTracker_v2_1_0";
-    const legacyData = localStorage.getItem(legacyKey) || localStorage.getItem('drPepperDeals');
-
-    let deals = defaultDeals;
-    let priceHistory = defaultHistory;
-    let targetPrice = 0.030;
-
-    if (legacyData) {
-      try {
-        const parsed = JSON.parse(legacyData);
-        deals = parsed.deals || parsed;
-        priceHistory = parsed.priceHistory || defaultHistory;
-      } catch(e) {}
-    }
-
-    const migratedState = {
-      version: APP_VERSION,
-      targetPrice: targetPrice,
-      deals: deals,
-      priceHistory: priceHistory,
-      lastSaved: new Date().toISOString()
-    };
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(migratedState));
-    return migratedState;
-  }
-
-  let appData = loadAndMigrateData();
-  let deals = appData.deals;
-  let priceHistory = appData.priceHistory;
-
-  const targetPriceInput = document.getElementById('targetPriceInput');
-  targetPriceInput.value = appData.targetPrice || 0.030;
-
-  targetPriceInput.addEventListener('input', () => {
-    appData.targetPrice = parseFloat(targetPriceInput.value) || 0.030;
-    saveToLocalStorage();
-    renderDeals();
-  });
-
-  function saveToLocalStorage() {
-    appData.deals = deals;
-    appData.priceHistory = priceHistory;
-    appData.lastSaved = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-  }
-
-  const form = document.getElementById('dealForm');
-  const dealList = document.getElementById('dealList');
-  const filterSelect = document.getElementById('filterSize');
-  const dealTypeSelect = document.getElementById('dealType');
-  const productSelect = document.getElementById('product');
-  const canCountGroup = document.getElementById('canCountGroup');
-  const canCountInput = document.getElementById('canCount');
-  const qtyGroup = document.getElementById('qtyGroup');
-  const priceLabel = document.getElementById('priceLabel');
-
-  productSelect.addEventListener('change', () => {
-    if (productSelect.value === 'custom-cans') {
-      canCountGroup.style.display = 'flex';
-    } else {
-      canCountGroup.style.display = 'none';
-    }
-  });
-
-  dealTypeSelect.addEventListener('change', () => {
-    if (dealTypeSelect.value === 'b2g1') {
-      qtyGroup.style.display = 'none';
-      priceLabel.innerText = "Single Item Regular Price ($)";
-      document.getElementById('totalPrice').placeholder = "e.g. 9.99";
-    } else if (dealTypeSelect.value === 'wyb3') {
-      qtyGroup.style.display = 'none';
-      priceLabel.innerText = "Price Each WYB 3 ($)";
-      document.getElementById('totalPrice').placeholder = "e.g. 3.99";
-    } else if (dealTypeSelect.value === 'pctOff3') {
-      qtyGroup.style.display = 'none';
-      priceLabel.innerText = "Single Item Regular Price ($)";
-      document.getElementById('totalPrice').placeholder = "e.g. 7.99";
-    } else {
-      qtyGroup.style.display = 'flex';
-      priceLabel.innerText = "Total Sale Price ($)";
-      document.getElementById('totalPrice').placeholder = "e.g. 15.00";
-    }
-  });
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const store = document.getElementById('store').value;
-    const productKey = productSelect.value;
-    const selectedOption = productSelect.options[productSelect.selectedIndex];
-
-    let label = selectedOption.text.split(' (')[0].replace('⭐ ', '');
-    let ozPerUnit = 144;
-    let unitsPerPack = parseInt(selectedOption.dataset.units, 10) || 12;
-    let unitName = selectedOption.dataset.unitName || "can";
-
-    if (productKey === 'custom-cans') {
-      const count = parseInt(canCountInput.value, 10) || 12;
-      ozPerUnit = count * 12;
-      unitsPerPack = count;
-      label = `${count}-Pack 12oz Cans`;
-    } else {
-      ozPerUnit = parseFloat(selectedOption.dataset.oz);
-    }
-
-    const link = selectedOption.dataset.link || "";
-    const dealType = dealTypeSelect.value;
-    const expireDate = document.getElementById('expireDate').value;
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    let qty = 1;
-    let totalPrice = 0;
-    let unitPriceEach = 0;
-
-    if (dealType === 'b2g1') {
-      qty = 3;
-      unitPriceEach = parseFloat(document.getElementById('totalPrice').value);
-      totalPrice = unitPriceEach * 2;
-    } else if (dealType === 'wyb3') {
-      qty = 3;
-      unitPriceEach = parseFloat(document.getElementById('totalPrice').value);
-      totalPrice = unitPriceEach * 3;
-    } else if (dealType === 'pctOff3') {
-      qty = 3;
-      unitPriceEach = parseFloat(document.getElementById('totalPrice').value);
-      totalPrice = (unitPriceEach * 3) * 0.60;
-    } else {
-      qty = parseInt(document.getElementById('quantity').value, 10);
-      totalPrice = parseFloat(document.getElementById('totalPrice').value);
-    }
-
-    const currentPricePerOz = totalPrice / (qty * ozPerUnit);
-
-    priceHistory.push({
-      store,
-      productKey,
-      pricePerOz: currentPricePerOz,
-      date: todayStr
-    });
-
-    const newDeal = {
-      id: Date.now(),
-      store,
-      productKey,
-      label,
-      dealType,
-      qty,
-      totalPrice,
-      unitPriceEach,
-      ozPerUnit,
-      unitsPerPack,
-      unitName,
-      expireDate,
-      updatedDate: todayStr,
-      link
-    };
-
-    const existingIndex = deals.findIndex(d => d.store === store && d.productKey === productKey);
-
-    if (existingIndex !== -1) {
-      deals[existingIndex] = { ...newDeal, id: deals[existingIndex].id };
-    } else {
-      deals.push(newDeal);
-    }
-
-    saveToLocalStorage();
-    form.reset();
-    productSelect.dispatchEvent(new Event('change'));
-    dealTypeSelect.dispatchEvent(new Event('change'));
-    renderDeals();
-  });
-
-  function deleteDeal(id) {
-    deals = deals.filter(deal => deal.id !== id);
-    saveToLocalStorage();
-    renderDeals();
-  }
-
-  filterSelect.addEventListener('change', renderDeals);
-
-  function calculateTrend(store, productKey, currentPricePerOz) {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const relevantHistory = priceHistory.filter(h =>
-      h.store === store &&
-      h.productKey === productKey &&
-      new Date(h.date) >= thirtyDaysAgo
-    );
-
-    if (relevantHistory.length < 2) return null;
-
-    const previousPrices = relevantHistory.slice(0, relevantHistory.length - 1);
-    const avgPrevPrice = previousPrices.reduce((sum, item) => sum + item.pricePerOz, 0) / previousPrices.length;
-
-    const diff = currentPricePerOz - avgPrevPrice;
-    if (Math.abs(diff) < 0.001) {
-      return { direction: 'neutral', text: '➖ 0%' };
-    } else if (diff < 0) {
-      const pct = Math.abs((diff / avgPrevPrice) * 100).toFixed(1);
-      return { direction: 'down', text: `🟢 🠗 ${pct}% (30d)` };
-    } else {
-      const pct = ((diff / avgPrevPrice) * 100).toFixed(1);
-      return { direction: 'up', text: `🔴 🠕 ${pct}% (30d)` };
-    }
-  }
-
-  function renderDeals() {
-    dealList.innerHTML = '';
-    const selectedFilter = filterSelect.value;
-    const now = new Date();
-    const currentTarget = appData.targetPrice || 0.030;
-
-    const activeDeals = deals.filter(deal => {
-      if (!deal.expireDate) return true;
-      const expDate = new Date(deal.expireDate + 'T23:59:59');
-      return now <= expDate;
-    });
-
-    const filteredDeals = activeDeals.filter(deal => selectedFilter === 'all' || deal.productKey === selectedFilter);
-
-    if (filteredDeals.length === 0) {
-      dealList.innerHTML = '<p style="color: #606770;">No active deals available for the selected size filter.</p>';
-      return;
-    }
-
-    const processedDeals = filteredDeals.map(deal => {
-      const totalOunces = deal.qty * deal.ozPerUnit;
-      const pricePerOz = deal.totalPrice / totalOunces;
-      const totalUnits = deal.qty * (deal.unitsPerPack || 12);
-      const costPerUnit = deal.totalPrice / totalUnits;
-      return { ...deal, totalOunces, pricePerOz, costPerUnit };
-    });
-
-    processedDeals.sort((a, b) => a.pricePerOz - b.pricePerOz);
-
-    processedDeals.forEach((deal, index) => {
-      const isBest = index === 0 && processedDeals.length > 1;
-      const isBuyNow = deal.pricePerOz <= currentTarget;
-
-      const card =
+    { id: 5, store: "Walmart", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "standard", qty: 1, totalPrice:
