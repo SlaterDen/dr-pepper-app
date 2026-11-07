@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dr Pepper Price Tracker - Weekly Ads (v2.1.0)</title>
+  <title>Dr Pepper Price Tracker - Weekly Ads (v2.2.0)</title>
 
   <!-- PWA Metadata -->
   <link rel="manifest" href="manifest.json">
@@ -23,6 +23,7 @@
       --text: #1C1E21;
       --green: #2E7D32;
       --red: #C62828;
+      --green-bg: #E8F5E9;
     }
 
     body {
@@ -72,6 +73,31 @@
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       margin-bottom: 24px;
+    }
+
+    .settings-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #EDF2F7;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .settings-bar label {
+      margin-bottom: 0;
+      text-transform: none;
+      font-size: 0.9rem;
+      color: #2D3748;
+    }
+
+    .settings-bar input {
+      width: 100px;
+      padding: 6px 8px;
+      font-weight: bold;
     }
 
     .form-grid {
@@ -166,32 +192,38 @@
       transition: border-color 0.2s ease;
     }
 
+    .deal-card.buy-now {
+      border: 2px solid var(--green);
+      background-color: var(--green-bg);
+    }
+
     .deal-card.best-value {
       border: 2px solid var(--gold);
-      background-color: #FFFDF5;
     }
 
     .badge {
-      background-color: var(--gold);
-      color: #000;
       font-size: 0.7rem;
       font-weight: bold;
       padding: 3px 8px;
       border-radius: 4px;
       margin-left: 8px;
       text-transform: uppercase;
+    }
+
+    .badge-buy {
+      background-color: var(--green);
+      color: white;
+    }
+
+    .badge-best {
+      background-color: var(--gold);
+      color: #000;
     }
 
     .badge-stale {
       background-color: #FFF3CD;
       color: #856404;
       border: 1px solid #FFEEBA;
-      font-size: 0.7rem;
-      font-weight: bold;
-      padding: 3px 8px;
-      border-radius: 4px;
-      margin-left: 8px;
-      text-transform: uppercase;
     }
 
     .trend-tag {
@@ -238,8 +270,15 @@
 
     .unit-price {
       font-size: 0.85rem;
-      color: #606770;
+      color: #2D3748;
+      font-weight: 600;
       margin-top: 2px;
+    }
+
+    .can-price {
+      font-size: 0.8rem;
+      color: #606770;
+      margin-top: 1px;
     }
 
     a.item-link {
@@ -260,12 +299,23 @@
 
 <div class="container">
   <header>
-    <h1>🥤 Dr Pepper Weekly Ad Tracker <span class="version-tag">v2.1.0</span></h1>
+    <h1>🥤 Dr Pepper Weekly Ad Tracker <span class="version-tag">v2.2.0</span></h1>
     <p class="subtitle">Compare deals across Target, Amazon, Fresh by Reasor's, Walmart, Dollar General, CVS, Walgreens, and Homeland</p>
   </header>
 
   <!-- Input Form -->
   <div class="card">
+    <!-- Stockup Target Setting -->
+    <div class="settings-bar">
+      <div>
+        <label for="targetPriceInput"><strong>🎯 Target Stockup Price:</strong></label>
+        <small style="display:block; color:#718096;">Triggers "BUY NOW" alert ($/fl oz)</small>
+      </div>
+      <div>
+        <input type="number" id="targetPriceInput" step="0.001" value="0.030"> <span style="font-size:0.85rem; font-weight:600;">/ fl oz</span>
+      </div>
+    </div>
+
     <form id="dealForm">
       <div class="form-grid">
         <div class="form-group">
@@ -285,15 +335,15 @@
         <div class="form-group">
           <label for="product">Packaging Size</label>
           <select id="product" required>
-            <option value="12pk-cans" data-oz="144" selected>12-Pack Cans (144 fl oz total)</option>
-            <option value="custom-cans" data-oz="custom">Custom 12oz Can Pack (Specify Count)</option>
-            <option value="20pk-cans" data-oz="240">20-Pack Cans (240 fl oz total)</option>
-            <option value="24pk-cans" data-oz="288">24-Pack Cans (288 fl oz total)</option>
-            <option value="6pk-bottles" data-oz="101.4">6-Pack 16.9oz Bottles (101.4 fl oz total)</option>
-            <option value="2L-bottle" data-oz="67.6">2-Liter Bottle (67.6 fl oz total)</option>
-            <option value="20oz-single" data-oz="20">20 oz Single Bottle (20 fl oz total)</option>
-            <option value="4pk-realsugar-12oz" data-oz="48">⭐ Real Sugar 4-Pack 12oz Bottles (48 fl oz)</option>
-            <option value="12pk-realsugar" data-oz="144" data-link="https://www.amazon.com/Dr-Pepper-Sugar-Ounce-Bottles/dp/B01DXWPEM0">⭐ Real Sugar 12-Pack 12oz Bottles (144 fl oz)</option>
+            <option value="12pk-cans" data-oz="144" data-units="12" data-unit-name="can" selected>12-Pack Cans (144 fl oz total)</option>
+            <option value="custom-cans" data-oz="custom" data-unit-name="can">Custom 12oz Can Pack (Specify Count)</option>
+            <option value="20pk-cans" data-oz="240" data-units="20" data-unit-name="can">20-Pack Cans (240 fl oz total)</option>
+            <option value="24pk-cans" data-oz="288" data-units="24" data-unit-name="can">24-Pack Cans (288 fl oz total)</option>
+            <option value="6pk-bottles" data-oz="101.4" data-units="6" data-unit-name="bottle">6-Pack 16.9oz Bottles (101.4 fl oz total)</option>
+            <option value="2L-bottle" data-oz="67.6" data-units="1" data-unit-name="bottle">2-Liter Bottle (67.6 fl oz total)</option>
+            <option value="20oz-single" data-oz="20" data-units="1" data-unit-name="bottle">20 oz Single Bottle (20 fl oz total)</option>
+            <option value="4pk-realsugar-12oz" data-oz="48" data-units="4" data-unit-name="bottle">⭐ Real Sugar 4-Pack 12oz Bottles (48 fl oz)</option>
+            <option value="12pk-realsugar" data-oz="144" data-units="12" data-unit-name="bottle" data-link="https://www.amazon.com/Dr-Pepper-Sugar-Ounce-Bottles/dp/B01DXWPEM0">⭐ Real Sugar 12-Pack 12oz Bottles (144 fl oz)</option>
           </select>
         </div>
 
@@ -360,21 +410,21 @@
   <div id="dealList"></div>
 
   <footer>
-    Dr Pepper Price Tracker • Version 2.1.0 • Data Saved Locally
+    Dr Pepper Price Tracker • Version 2.2.0 • Data Saved Locally
   </footer>
 </div>
 
 <script>
-  const APP_VERSION = "2.1.0";
-  const STORAGE_KEY = "dpTracker_v2_1_0";
+  const APP_VERSION = "2.2.0";
+  const STORAGE_KEY = "dpTracker_v2_2_0";
 
   const defaultDeals = [
-    { id: 1, store: "Target", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "pctOff3", qty: 3, totalPrice: 14.38, unitPriceEach: 7.99, ozPerUnit: 144, expireDate: "", updatedDate: "2026-11-01" },
-    { id: 2, store: "Fresh by Reasor's", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "wyb3", qty: 3, totalPrice: 11.97, unitPriceEach: 3.99, ozPerUnit: 144, expireDate: "", updatedDate: "2026-11-04" },
-    { id: 3, store: "CVS", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "b2g1", qty: 3, totalPrice: 19.98, unitPriceEach: 9.99, ozPerUnit: 144, expireDate: "", updatedDate: "2026-10-01" },
-    { id: 4, store: "Dollar General", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "standard", qty: 3, totalPrice: 15.00, ozPerUnit: 144, expireDate: "", updatedDate: "2026-11-02" },
-    { id: 5, store: "Walmart", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "standard", qty: 1, totalPrice: 7.28, ozPerUnit: 144, expireDate: "", updatedDate: "2026-11-05" },
-    { id: 6, store: "Amazon", productKey: "12pk-realsugar", label: "Real Sugar 12-Pack 12oz Bottles", dealType: "standard", qty: 1, totalPrice: 29.99, ozPerUnit: 144, expireDate: "", updatedDate: "2026-11-03", link: "https://www.amazon.com/Dr-Pepper-Sugar-Ounce-Bottles/dp/B01DXWPEM0" }
+    { id: 1, store: "Target", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "pctOff3", qty: 3, totalPrice: 14.38, unitPriceEach: 7.99, ozPerUnit: 144, unitsPerPack: 12, unitName: "can", expireDate: "", updatedDate: "2026-11-01" },
+    { id: 2, store: "Fresh by Reasor's", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "wyb3", qty: 3, totalPrice: 11.97, unitPriceEach: 3.99, ozPerUnit: 144, unitsPerPack: 12, unitName: "can", expireDate: "", updatedDate: "2026-11-04" },
+    { id: 3, store: "CVS", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "b2g1", qty: 3, totalPrice: 19.98, unitPriceEach: 9.99, ozPerUnit: 144, unitsPerPack: 12, unitName: "can", expireDate: "", updatedDate: "2026-10-01" },
+    { id: 4, store: "Dollar General", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "standard", qty: 3, totalPrice: 15.00, ozPerUnit: 144, unitsPerPack: 12, unitName: "can", expireDate: "", updatedDate: "2026-11-02" },
+    { id: 5, store: "Walmart", productKey: "12pk-cans", label: "12-Pack Cans", dealType: "standard", qty: 1, totalPrice: 7.28, ozPerUnit: 144, unitsPerPack: 12, unitName: "can", expireDate: "", updatedDate: "2026-11-05" },
+    { id: 6, store: "Amazon", productKey: "12pk-realsugar", label: "Real Sugar 12-Pack 12oz Bottles", dealType: "standard", qty: 1, totalPrice: 29.99, ozPerUnit: 144, unitsPerPack: 12, unitName: "bottle", expireDate: "", updatedDate: "2026-11-03", link: "https://www.amazon.com/Dr-Pepper-Sugar-Ounce-Bottles/dp/B01DXWPEM0" }
   ];
 
   const defaultHistory = [
@@ -394,15 +444,25 @@
       }
     }
 
-    // Check for older version keys and migrate forward automatically
-    const legacyDeals = localStorage.getItem('drPepperDeals');
-    const legacyHistory = localStorage.getItem('drPepperHistory');
+    // Migration from v2.1.0 or earlier
+    const legacyKey = "dpTracker_v2_1_0";
+    const legacyData = localStorage.getItem(legacyKey) || localStorage.getItem('drPepperDeals');
 
-    const deals = legacyDeals ? JSON.parse(legacyDeals) : defaultDeals;
-    const priceHistory = legacyHistory ? JSON.parse(legacyHistory) : defaultHistory;
+    let deals = defaultDeals;
+    let priceHistory = defaultHistory;
+    let targetPrice = 0.030;
+
+    if (legacyData) {
+      try {
+        const parsed = JSON.parse(legacyData);
+        deals = parsed.deals || parsed;
+        priceHistory = parsed.priceHistory || defaultHistory;
+      } catch(e) {}
+    }
 
     const migratedState = {
       version: APP_VERSION,
+      targetPrice: targetPrice,
       deals: deals,
       priceHistory: priceHistory,
       lastSaved: new Date().toISOString()
@@ -415,6 +475,15 @@
   let appData = loadAndMigrateData();
   let deals = appData.deals;
   let priceHistory = appData.priceHistory;
+
+  const targetPriceInput = document.getElementById('targetPriceInput');
+  targetPriceInput.value = appData.targetPrice || 0.030;
+
+  targetPriceInput.addEventListener('input', () => {
+    appData.targetPrice = parseFloat(targetPriceInput.value) || 0.030;
+    saveToLocalStorage();
+    renderDeals();
+  });
 
   function saveToLocalStorage() {
     appData.deals = deals;
@@ -466,18 +535,23 @@
 
     const store = document.getElementById('store').value;
     const productKey = productSelect.value;
-    let label = productSelect.options[productSelect.selectedIndex].text.split(' (')[0].replace('⭐ ', '');
+    const selectedOption = productSelect.options[productSelect.selectedIndex];
+
+    let label = selectedOption.text.split(' (')[0].replace('⭐ ', '');
     let ozPerUnit = 144;
+    let unitsPerPack = parseInt(selectedOption.dataset.units, 10) || 12;
+    let unitName = selectedOption.dataset.unitName || "can";
 
     if (productKey === 'custom-cans') {
       const count = parseInt(canCountInput.value, 10) || 12;
       ozPerUnit = count * 12;
+      unitsPerPack = count;
       label = `${count}-Pack 12oz Cans`;
     } else {
-      ozPerUnit = parseFloat(productSelect.options[productSelect.selectedIndex].dataset.oz);
+      ozPerUnit = parseFloat(selectedOption.dataset.oz);
     }
 
-    const link = productSelect.options[productSelect.selectedIndex].dataset.link || "";
+    const link = selectedOption.dataset.link || "";
     const dealType = dealTypeSelect.value;
     const expireDate = document.getElementById('expireDate').value;
     const todayStr = new Date().toISOString().split('T')[0];
@@ -522,6 +596,8 @@
       totalPrice,
       unitPriceEach,
       ozPerUnit,
+      unitsPerPack,
+      unitName,
       expireDate,
       updatedDate: todayStr,
       link
@@ -581,6 +657,7 @@
     dealList.innerHTML = '';
     const selectedFilter = filterSelect.value;
     const now = new Date();
+    const currentTarget = appData.targetPrice || 0.030;
 
     const activeDeals = deals.filter(deal => {
       if (!deal.expireDate) return true;
@@ -598,88 +675,15 @@
     const processedDeals = filteredDeals.map(deal => {
       const totalOunces = deal.qty * deal.ozPerUnit;
       const pricePerOz = deal.totalPrice / totalOunces;
-      return { ...deal, totalOunces, pricePerOz };
+      const totalUnits = deal.qty * (deal.unitsPerPack || 12);
+      const costPerUnit = deal.totalPrice / totalUnits;
+      return { ...deal, totalOunces, pricePerOz, costPerUnit };
     });
 
     processedDeals.sort((a, b) => a.pricePerOz - b.pricePerOz);
 
     processedDeals.forEach((deal, index) => {
       const isBest = index === 0 && processedDeals.length > 1;
-      const card = document.createElement('div');
-      card.className = `deal-card ${isBest ? 'best-value' : ''}`;
+      const isBuyNow = deal.pricePerOz <= currentTarget;
 
-      let isStale = false;
-      if (deal.updatedDate) {
-        const lastUpdated = new Date(deal.updatedDate + 'T00:00:00');
-        const diffDays = Math.floor((now - lastUpdated) / (1000 * 60 * 60 * 24));
-        if (diffDays > 30) isStale = true;
-      }
-
-      let promoText = '';
-      if (deal.dealType === 'b2g1') {
-        promoText = `Buy 2 Get 1 FREE ($${deal.unitPriceEach.toFixed(2)} reg. each)`;
-      } else if (deal.dealType === 'wyb3') {
-        promoText = `$${deal.unitPriceEach.toFixed(2)} each WYB 3`;
-      } else if (deal.dealType === 'pctOff3') {
-        promoText = `Save 40% WYB 3 ($${deal.unitPriceEach.toFixed(2)} reg. each)`;
-      } else {
-        promoText = deal.qty > 1 ? `${deal.qty} for $${deal.totalPrice.toFixed(2)}` : `$${deal.totalPrice.toFixed(2)} each`;
-      }
-
-      let expireHTML = '';
-      if (deal.expireDate) {
-        const dateObj = new Date(deal.expireDate + 'T00:00:00');
-        const formattedDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-        expireHTML = ` • <span class="expire-tag">Expires: ${formattedDate}</span>`;
-      }
-
-      let updatedHTML = '';
-      if (deal.updatedDate) {
-        const dateObj = new Date(deal.updatedDate + 'T00:00:00');
-        const formattedUpdated = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-        updatedHTML = ` • <span class="updated-tag">Updated: ${formattedUpdated}</span>`;
-      }
-
-      const trend = calculateTrend(deal.store, deal.productKey, deal.pricePerOz);
-      let trendHTML = '';
-      if (trend) {
-        trendHTML = `<span class="trend-tag trend-${trend.direction}">${trend.text}</span>`;
-      }
-
-      let linkHTML = deal.link ? `<br><a href="${deal.link}" target="_blank" class="item-link">View Item on Amazon ↗</a>` : '';
-      let staleBadgeHTML = isStale ? `<span class="badge-stale">⚠️ Old Data, Please Confirm Price</span>` : '';
-
-      card.innerHTML = `
-        <div>
-          <span class="store-title">${deal.store}</span>
-          ${isBest ? '<span class="badge">Best Value</span>' : ''}
-          ${staleBadgeHTML}
-          ${trendHTML}
-          <div class="deal-details">${deal.label} • (${promoText})${expireHTML}${updatedHTML}${linkHTML}</div>
-          <button class="btn-delete" onclick="deleteDeal(${deal.id})">Remove</button>
-        </div>
-        <div class="price-block">
-          <div class="total-price">$${deal.totalPrice.toFixed(2)} total</div>
-          <div class="unit-price">$${deal.pricePerOz.toFixed(3)} / fl oz</div>
-        </div>
-      `;
-
-      dealList.appendChild(card);
-    });
-  }
-
-  renderDeals();
-</script>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then((reg) => console.log('Service Worker Registered!', reg))
-        .catch((err) => console.error('Service Worker Registration Failed:', err));
-    });
-  }
-</script>
-
-</body>
-</html>
+      const card =
